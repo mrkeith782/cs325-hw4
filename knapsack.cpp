@@ -29,15 +29,12 @@ int main() {
         return 0;
     }
 
-    //Due to the location of the cursor, we should be on the new line. After, we write to a new line on the out file
-    while(data.peek() != EOF) {
-        item* new_data = populate_array_from_file(data);
-        int size = 0;
+    item* new_data = populate_array_from_file(data);
+    int size = 0;
 
-        int temp = find_best(new_data);
-        write_out_from_array(new_data);
-        free(new_data);
-    }
+    cout << "BEST AMOUNT: " << find_best(new_data) << endl;
+    write_out_from_array(new_data);
+    free(new_data);
     data.close();
 }
 
@@ -88,27 +85,46 @@ item* populate_array_from_file(ifstream& data) {
 }
 
 int find_best(item* items) { //right is index of. 
-    int** best = new int*[100];
-    for (int i = 0; i < 100; i++) {
-        best[i] = new int[100];
+    int** best = new int*[6];
+    for (int i = 0; i < 5; i++) {
+        best[i] = new int[6];
     }
 
     int W = 6; //new weight
     int n = 5; //amount of items
 
-    for(int i = 0; i < W; i++) {
-        best[0][i] = 0;
+    for(int w = 0; w < W; w++) {
+        best[0][w] = 0;
     }
-    cout << "a" << endl;
-    for(int i = 0; i < n; i++) {
+
+    for(int i = 1; i < n; i++) {
         best[i][0] = 0;
         for(int w = 0; w < W; w++) { 
             if (items[i].weight <= w) {
-                if (items[i].val)
+                if (items[i].val + best[i-1][w-items[i].weight] > best[i-1][w]) {
+                    best[i][w] = items[i].val + best[i-1][w-1];
+                }
+                else {
+                    best[i][w] = best[i-1][w];
+                }
+            }
+            else {
+                best[i][w] = best[i-1][w];
             }
         }
     }
-    cout << best[n][n] << endl;
+    int temp = best[4][5];
+    // for (int i = 0; i < 6; i++) {
+    //     for (int j = 0; j < 5; j++) {
+    //         cout << best[j][i] << " ";
+    //     }
+    //     cout << endl;
+    // }
+    for (int i = 0; i < 5; i++) {
+        free(best[i]);
+    }
+    free(best);
+    return temp;
 }
 
 void write_out_from_array(item* items) {
